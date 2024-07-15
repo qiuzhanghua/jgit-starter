@@ -11,11 +11,10 @@ learn how to use JGit to manipulate git repository.
 ```dotenv
 GIT_USERNAME=your_git_user_name
 GIT_PASSWORD=your_git_password
+GIT_URI=your_git_uri
 ```
-## 2. Don't forget to modify uri
-in JgitStarterApplicationTests.java
 
-## 3. Run the test
+## 2. Run the test
 ```shell
 mvn test
 ```
