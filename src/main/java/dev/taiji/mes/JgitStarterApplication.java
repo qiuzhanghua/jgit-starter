@@ -5,10 +5,13 @@ import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.util.Assert;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +28,10 @@ public class JgitStarterApplication {
 				.ignoreIfMalformed()
 				.ignoreIfMissing()
 				.load();
+        String uri = dotenv.get("GIT_URI");
+        String username = dotenv.get("GIT_USERNAME");
+        String password = dotenv.get("GIT_PASSWORD");
+
         try (Git git = Git.open(new File("."))) {
             git.pull().call();
             Repository repository = git.getRepository();
@@ -38,9 +45,12 @@ public class JgitStarterApplication {
                     .setMessage("Commit all changes including additions")
                     .call();
 
+            CredentialsProvider cp = new UsernamePasswordCredentialsProvider(username, password);
+
 
             Iterable<PushResult> results = git.push()
-                    .setRemote("gitee")
+                    .setRemote(uri)
+                    .setCredentialsProvider(cp)
                     .call();
             for (PushResult r : results) {
                 for (RemoteRefUpdate update : r.getRemoteUpdates()) {
