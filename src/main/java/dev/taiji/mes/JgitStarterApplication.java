@@ -40,6 +40,7 @@ public class JgitStarterApplication {
 
 
             Iterable<PushResult> results = git.push()
+                    .setRemote("gitee")
                     .call();
             for (PushResult r : results) {
                 for (RemoteRefUpdate update : r.getRemoteUpdates()) {
