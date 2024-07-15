@@ -32,37 +32,37 @@ public class JgitStarterApplication {
         String username = dotenv.get("GIT_USERNAME");
         String password = dotenv.get("GIT_PASSWORD");
 
-        try (Git git = Git.open(new File("."))) {
-            git.pull().call();
-            Repository repository = git.getRepository();
-            git.add().addFilepattern(".").call();
-
-            // Stage all changed files, including deleted files, excluding new files
-            git.add().addFilepattern(".").setUpdate(true).call();
-
-            // and then commit the changes.
-            git.commit()
-                    .setMessage("Commit all changes including additions")
-                    .call();
-
-            CredentialsProvider cp = new UsernamePasswordCredentialsProvider(username, password);
-
-
-            Iterable<PushResult> results = git.push()
-                    .setRemote(uri)
-                    .setCredentialsProvider(cp)
-                    .call();
-            for (PushResult r : results) {
-                for (RemoteRefUpdate update : r.getRemoteUpdates()) {
-                    System.out.println("Having result: " + update);
-                    if (update.getStatus() != RemoteRefUpdate.Status.OK && update.getStatus() != RemoteRefUpdate.Status.UP_TO_DATE) {
-                        String errorMessage = "Push failed: " + update.getStatus();
-                        throw new RuntimeException(errorMessage);
-                    }
-                }
-            }
-        } catch (IOException | GitAPIException e) {
-            throw new RuntimeException(e);
-        }
+        // for github.com LFS is not supported, but zip can be used
+        // for gitee.com LFS is supported for enterprise users, upload is rejected for free users
+//        try (Git git = Git.open(new File("."))) {
+//            git.pull().call();
+//            Repository repository = git.getRepository();
+//            git.add().addFilepattern(".").call();
+//
+//            // Stage all changed files, including deleted files, excluding new files
+//            git.add().addFilepattern(".").setUpdate(true).call();
+//
+//            // and then commit the changes.
+//            git.commit()
+//                    .setMessage("Commit all changes including additions")
+//                    .call();
+//
+//            CredentialsProvider cp = new UsernamePasswordCredentialsProvider(username, password);
+//            Iterable<PushResult> results = git.push()
+//                    .setRemote(uri)
+//                    .setCredentialsProvider(cp)
+//                    .call();
+//            for (PushResult r : results) {
+//                for (RemoteRefUpdate update : r.getRemoteUpdates()) {
+//                    System.out.println("Having result: " + update);
+//                    if (update.getStatus() != RemoteRefUpdate.Status.OK && update.getStatus() != RemoteRefUpdate.Status.UP_TO_DATE) {
+//                        String errorMessage = "Push failed: " + update.getStatus();
+//                        throw new RuntimeException(errorMessage);
+//                    }
+//                }
+//            }
+//        } catch (IOException | GitAPIException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 }
