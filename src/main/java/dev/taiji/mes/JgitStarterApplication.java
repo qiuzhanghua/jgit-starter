@@ -5,6 +5,8 @@ import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.transport.PushResult;
+import org.eclipse.jgit.transport.RemoteRefUpdate;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -37,8 +39,22 @@ public class JgitStarterApplication {
 			git.commit()
 					.setMessage("Commit all changes including additions")
 					.call();
-			
-        } catch (IOException | GitAPIException e) {
+
+
+			Iterable<PushResult> results = git.push()
+					.call();
+			for (PushResult r : results) {
+				for(RemoteRefUpdate update : r.getRemoteUpdates()) {
+					System.out.println("Having result: " + update);
+					if(update.getStatus() != RemoteRefUpdate.Status.OK && update.getStatus() != RemoteRefUpdate.Status.UP_TO_DATE) {
+						String errorMessage = "Push failed: "+ update.getStatus();
+						throw new RuntimeException(errorMessage);
+					}
+				}
+			}
+
+
+		} catch (IOException | GitAPIException e) {
             throw new RuntimeException(e);
         }
     }
