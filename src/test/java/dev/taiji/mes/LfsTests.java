@@ -6,6 +6,7 @@ import org.eclipse.jgit.lfs.BuiltinLFS;
 import org.eclipse.jgit.lfs.InstallBuiltinLfsCommand;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.util.FS;
 import org.eclipse.jgit.util.LfsFactory;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,7 @@ public class LfsTests {
         Git git = Git.open(new File(path));
         ObjectId head = git.getRepository().resolve("HEAD");
         Assert.notNull(head, "HEAD is required");
+        Repository repository = git.getRepository();
         git.getRepository().readOrigHead();
         BuiltinLFS.register();
         BuiltinLFS builtinLFS = (BuiltinLFS) LfsFactory.getInstance();
@@ -59,7 +61,13 @@ public class LfsTests {
         installCommand.setRepository(git.getRepository());
         installCommand.call();
         Assert.isTrue(builtinLFS.isEnabled(git.getRepository()), "LFS support is enabled");
-
+        String[] track = new String[] { "lfs", "track", "*.rar" };
+        ProcessBuilder builder = FS.DETECTED.runInShell("git", track);
+        if (repository != null) {
+            builder.directory(repository.isBare() ? repository.getDirectory()
+                    : repository.getWorkTree());
+        }
+        FS.DETECTED.runProcess(builder, System.out, null, (String) null);
     }
 }
 
