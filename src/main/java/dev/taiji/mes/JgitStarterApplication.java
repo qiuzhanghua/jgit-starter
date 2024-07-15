@@ -25,36 +25,32 @@ public class JgitStarterApplication {
 				.ignoreIfMalformed()
 				.ignoreIfMissing()
 				.load();
+        try (Git git = Git.open(new File("."))) {
+            git.pull().call();
+            Repository repository = git.getRepository();
+            git.add().addFilepattern(".").call();
 
-        try {
-            Git git = Git.open(new File("."));
-			git.pull().call();
-			Repository repository = git.getRepository();
-			git.add().addFilepattern(".").call();
+            // Stage all changed files, including deleted files, excluding new files
+            git.add().addFilepattern(".").setUpdate(true).call();
 
-			// Stage all changed files, including deleted files, excluding new files
-			git.add().addFilepattern(".").setUpdate(true).call();
-
-			// and then commit the changes.
-			git.commit()
-					.setMessage("Commit all changes including additions")
-					.call();
+            // and then commit the changes.
+            git.commit()
+                    .setMessage("Commit all changes including additions")
+                    .call();
 
 
-			Iterable<PushResult> results = git.push()
-					.call();
-			for (PushResult r : results) {
-				for(RemoteRefUpdate update : r.getRemoteUpdates()) {
-					System.out.println("Having result: " + update);
-					if(update.getStatus() != RemoteRefUpdate.Status.OK && update.getStatus() != RemoteRefUpdate.Status.UP_TO_DATE) {
-						String errorMessage = "Push failed: "+ update.getStatus();
-						throw new RuntimeException(errorMessage);
-					}
-				}
-			}
-
-
-		} catch (IOException | GitAPIException e) {
+            Iterable<PushResult> results = git.push()
+                    .call();
+            for (PushResult r : results) {
+                for (RemoteRefUpdate update : r.getRemoteUpdates()) {
+                    System.out.println("Having result: " + update);
+                    if (update.getStatus() != RemoteRefUpdate.Status.OK && update.getStatus() != RemoteRefUpdate.Status.UP_TO_DATE) {
+                        String errorMessage = "Push failed: " + update.getStatus();
+                        throw new RuntimeException(errorMessage);
+                    }
+                }
+            }
+        } catch (IOException | GitAPIException e) {
             throw new RuntimeException(e);
         }
     }
